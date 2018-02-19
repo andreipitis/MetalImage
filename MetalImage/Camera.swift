@@ -13,6 +13,9 @@ public class Camera: NSObject, ImageSource {
     public var targets: [ImageConsumer] = []
 
     fileprivate(set) public var outputTexture: MTLTexture?
+
+    private let context: MetalContext
+    
     fileprivate var frameTime: CMTime = kCMTimeInvalid
 
     private let captureSession: AVCaptureSession = AVCaptureSession()
@@ -20,7 +23,7 @@ public class Camera: NSObject, ImageSource {
     private let videoProcessingQueue = DispatchQueue(label: "videoProcessingQueue", qos: .default)
     private let audioProcessingQueue = DispatchQueue(label: "audioProcessingQueue", qos: .default)
 
-    fileprivate var metalTextureCache: CVMetalTextureCache?
+    fileprivate let metalTextureCache: CVMetalTextureCache
 
     #if os(iOS)
     private var displayLink: CADisplayLink?
@@ -34,17 +37,16 @@ public class Camera: NSObject, ImageSource {
         }
     }
 
-    public init(preferredCaptureDevice: AVCaptureDevice.Position = .back) {
-        super.init()
-
-        let result: CVReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, MetalDevice.sharedInstance.device, nil, &metalTextureCache)
-
-        guard result == kCVReturnSuccess else {
+    public init?(preferredCaptureDevice: AVCaptureDevice.Position = .back, context: MetalContext) {
+        guard let textureCache = context.textureCache() else {
             Log("Could not create texture cache")
-            return
+            return nil
         }
 
-        CVMetalTextureCacheFlush(metalTextureCache!, 0)
+        self.metalTextureCache = textureCache
+        self.context = context
+
+        super.init()
 
         captureSession.beginConfiguration()
 
@@ -180,7 +182,7 @@ public class Camera: NSObject, ImageSource {
         autoreleasepool {
             if let texture = outputTexture {
                 for var target in targets {
-                    let commandBuffer = MetalDevice.sharedInstance.newCommandBuffer()
+                    let commandBuffer = context.newCommandBuffer()
 
                     target.inputTexture = texture
                     target.newFrameReady(at: frameTime, at: 0, using: commandBuffer)
@@ -217,7 +219,7 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDa
                     let height = CVPixelBufferGetHeight(pixelBuffer)
 
                     var cvMetalTexture: CVMetalTexture?
-                    let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache!, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
+                    let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
 
                     guard result == kCVReturnSuccess else {
                         Log("Failed to get metal texture from pixel buffer")

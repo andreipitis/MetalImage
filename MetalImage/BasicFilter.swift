@@ -17,42 +17,41 @@ struct PipelineStateConfiguration {
     let computeShader: String
 }
 
-let vertexData: [Float] = [
-    -1.0, 1.0,
-    1.0, 1.0,
-    1.0, -1.0,
-    -1.0, -1.0]
-
-let textureData: [Float] = [
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-]
-
-let indexData: [UInt16] = [0, 1, 2, 2, 3, 0]
-
 public class BasicFilter: ImageSource, ImageConsumer {
     public var targets: [ImageConsumer] = []
     
     public var inputTexture: MTLTexture?
-    private(set) public var outputTexture: MTLTexture?
+    public private(set) var outputTexture: MTLTexture?
 
-    private var pipelineState: PipelineStateConfiguration
+    private let context: MetalContext
 
     private var computePipelineState: MTLComputePipelineState?
     private var renderPipelineState: MTLRenderPipelineState?
 
-    public init(fragmentShader: String, vertexShader: String) {
-        pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: vertexShader, fragmentShader: fragmentShader, computeShader: "")
+    private var indexBuffer: MTLBuffer
+    private var vertexBuffer: MTLBuffer
+    private var textureBuffer: MTLBuffer
 
-        commonInit()
+    public init(vertexShader: String, fragmentShader: String, context: MetalContext) {
+        let pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: vertexShader, fragmentShader: fragmentShader, computeShader: "")
+
+        self.context = context
+        indexBuffer = context.buffer(array: Static.indexData)
+        vertexBuffer = context.buffer(array: Static.vertexData)
+        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
+
+        commonInit(pipelineState: pipelineState, context: context)
     }
 
-    public init(computeShader: String) {
-        pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: "", fragmentShader: "", computeShader: computeShader)
+    public init(computeShader: String, context: MetalContext) {
+        let pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: "", fragmentShader: "", computeShader: computeShader)
 
-        commonInit()
+        self.context = context
+        indexBuffer = context.buffer(array: Static.indexData)
+        vertexBuffer = context.buffer(array: Static.vertexData)
+        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
+
+        commonInit(pipelineState: pipelineState, context: context)
     }
 
     deinit {
@@ -64,7 +63,7 @@ public class BasicFilter: ImageSource, ImageConsumer {
             var nextBuffer = buffer
             for var target in targets {
                 calculateWithCommandBuffer(buffer: nextBuffer, target: &target, at: time)
-                nextBuffer = MetalDevice.sharedInstance.newCommandBuffer()
+                nextBuffer = context.newCommandBuffer()
             }
         }
     }
@@ -76,7 +75,7 @@ public class BasicFilter: ImageSource, ImageConsumer {
             textureDescriptor.usage = [.shaderRead, .renderTarget, .shaderWrite]
             textureDescriptor.width = inputTexture!.width
             textureDescriptor.height = inputTexture!.height
-            outputTexture = MetalDevice.createTexture(descriptor: textureDescriptor)
+            outputTexture = buffer.device.makeTexture(descriptor: textureDescriptor)!
         }
 
         if let renderPipelineState = renderPipelineState {
@@ -84,10 +83,6 @@ public class BasicFilter: ImageSource, ImageConsumer {
             guard let renderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
                 return
             }
-
-            let indexBuffer = MetalDevice.sharedInstance.buffer(array: indexData)
-            let vertexBuffer = MetalDevice.sharedInstance.buffer(array: vertexData)
-            let textureBuffer = MetalDevice.sharedInstance.buffer(array: TextureRotation.none.rotation())
 
             renderCommandEncoder.pushDebugGroup("Base Filter Render Encoder")
             renderCommandEncoder.setFragmentTexture(inputTexture, index: 0)
@@ -138,13 +133,13 @@ public class BasicFilter: ImageSource, ImageConsumer {
         return renderPassDescriptor
     }
 
-    private func configurePipeline() {
+    private func configurePipeline(pipelineState: PipelineStateConfiguration, context: MetalContext) {
         if pipelineState.computeShader.count > 0 {
             if computePipelineState != nil {
                 return
             }
             do {
-                computePipelineState = try MetalDevice.createComputePipeline(computeFunctionName: pipelineState.computeShader)
+                computePipelineState = try context.createComputePipeline(computeFunctionName: pipelineState.computeShader)
             } catch {
                 Log("Could not create compute pipeline state.")
             }
@@ -154,14 +149,14 @@ public class BasicFilter: ImageSource, ImageConsumer {
             }
 
             do {
-                renderPipelineState = try MetalDevice.createRenderPipeline(vertexFunctionName: pipelineState.vertexShader, fragmentFunctionName: pipelineState.fragmentShader)
+                renderPipelineState = try context.createRenderPipeline(vertexFunctionName: pipelineState.vertexShader, fragmentFunctionName: pipelineState.fragmentShader)
             } catch {
                 Log("Could not create render pipeline state.")
             }
         }
     }
     
-    private func commonInit() {
-        configurePipeline()
+    private func commonInit(pipelineState: PipelineStateConfiguration, context: MetalContext) {
+        configurePipeline(pipelineState: pipelineState, context: context)
     }
 }

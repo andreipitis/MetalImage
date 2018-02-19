@@ -32,7 +32,8 @@ public class MovieInput: ImageSource {
     private var assetReader: AVAssetReader?
     private let assetReaderQueue: DispatchQueue = DispatchQueue.global(qos: .background)
 
-    private var metalTextureCache: CVMetalTextureCache?
+    private let context: MetalContext
+    private let metalTextureCache: CVMetalTextureCache
 
     //Used for playback at actual speed
     private var endRecordingTime: CMTime = kCMTimeZero
@@ -57,7 +58,15 @@ public class MovieInput: ImageSource {
         }
     }
 
-    public init?(url: URL, playbackOptions: PlaybackOptions = .none) {
+    public init?(url: URL, playbackOptions: PlaybackOptions = .none, context: MetalContext) {
+        guard let textureCache = context.textureCache() else {
+            Log("Could not create texture cache")
+            return nil
+        }
+
+        self.metalTextureCache = textureCache
+        self.context = context
+
         asset = AVURLAsset(url: url)
 
         self.playbackOptions = playbackOptions
@@ -121,15 +130,6 @@ public class MovieInput: ImageSource {
             setupAudio(audioTracks: audioTracks, for: assetReader!)
             setupVideo(videoTracks: videoTracks, for: assetReader!)
         }
-
-        let result: CVReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, MetalDevice.sharedInstance.device, nil, &metalTextureCache)
-
-        guard result == kCVReturnSuccess else {
-            Log("Could not create texture cache")
-            return nil
-        }
-
-        CVMetalTextureCacheFlush(metalTextureCache!, 0)
     }
 
     deinit {
@@ -392,7 +392,7 @@ public class MovieInput: ImageSource {
         let height = CVPixelBufferGetHeight(pixelBuffer)
 
         var cvMetalTexture: CVMetalTexture?
-        let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache!, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
+        let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
 
         guard result == kCVReturnSuccess else {
             Log("Failed to get metal texture from pixel buffer")
@@ -405,7 +405,7 @@ public class MovieInput: ImageSource {
 
         autoreleasepool {
             for var target in targets {
-                let commandBuffer = MetalDevice.sharedInstance.newCommandBuffer()
+                let commandBuffer = context.newCommandBuffer()
 
                 target.inputTexture = metalTexture
                 target.newFrameReady(at: frameTime, at: 0, using: commandBuffer)

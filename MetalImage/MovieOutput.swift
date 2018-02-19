@@ -45,15 +45,11 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
 
     private var renderPipelineState: MTLRenderPipelineState?
 
-    private let indexBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: indexData)
-    private let vertexBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: vertexData)
-    private let textureBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: TextureRotation.none.rotation())
+    private let indexBuffer: MTLBuffer
+    private let vertexBuffer: MTLBuffer
+    private let textureBuffer: MTLBuffer
 
-    public func veryImportantFunc() {
-
-    }
-
-    public init?(url: URL, size: CGSize, fileType: AVFileType = AVFileType.mov, liveVideo: Bool = false, optimizeForNetworkUse: Bool = true) {
+    public init?(url: URL, size: CGSize, fileType: AVFileType = AVFileType.mov, liveVideo: Bool = false, optimizeForNetworkUse: Bool = true, context: MetalContext) {
         self.liveVideo = liveVideo
 
         do {
@@ -92,10 +88,14 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriter.add(assetWriterVideoInput)
 
         do {
-            renderPipelineState = try MetalDevice.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
+            renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
         } catch {
             Log("Could not create render pipeline state.")
         }
+
+        indexBuffer = context.buffer(array: Static.indexData)
+        vertexBuffer = context.buffer(array: Static.vertexData)
+        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
 
         let textureDescriptor = MTLTextureDescriptor()
         textureDescriptor.pixelFormat = .bgra8Unorm
@@ -103,7 +103,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         
         textureDescriptor.width = Int(size.width)
         textureDescriptor.height = Int(size.height)
-        outputTexture = MetalDevice.createTexture(descriptor: textureDescriptor)
+        outputTexture = context.createTexture(descriptor: textureDescriptor)
     }
 
     deinit {
@@ -312,7 +312,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             return
         }
 
-        let content: [Float] = vertexData
+        let content: [Float] = Static.vertexData
 
         let inputSize = CGSize(width: width, height: height)
         let outputSize = CGSize(width: outputTexture!.width, height: outputTexture!.width)

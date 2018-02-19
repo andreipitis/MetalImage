@@ -15,13 +15,17 @@ public class Image: ImageSource {
 
     private(set) public var outputTexture: MTLTexture?
 
-    public init(cgImage: CGImage?) {
+    private let context: MetalContext
 
+    public init?(cgImage: CGImage?, context: MetalContext) {
         guard let cgImage = cgImage else {
             outputTexture = nil
-            return
+            return nil
         }
-        let textureLoader = MTKTextureLoader(device: MetalDevice.sharedInstance.device)
+
+        self.context = context
+
+        let textureLoader = MTKTextureLoader(device: context.device)
 
         let options: [MTKTextureLoader.Option: Any] = [
             .textureStorageMode:   MTLStorageMode.private,
@@ -32,10 +36,10 @@ public class Image: ImageSource {
         outputTexture = try? textureLoader.newTexture(cgImage: cgImage, options: options)
     }
 
-    public convenience init?(fileName: String) {
+    public convenience init?(fileName: String, context: MetalContext) {
         #if os(iOS)
             if let image = UIImage(named: fileName) {
-                self.init(cgImage: image.cgImage)
+                self.init(cgImage: image.cgImage, context: context)
             } else {
                 return nil
             }
@@ -43,7 +47,7 @@ public class Image: ImageSource {
             if let image = NSImage(named: NSImage.Name(rawValue: fileName)) {
                 var imageRect: CGRect = CGRect(x: 0.0, y: 0.0, width: image.size.width, height: image.size.height)
                 let cgImage = image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
-                self.init(cgImage: cgImage)
+                self.init(cgImage: cgImage, context: context)
             } else {
                 return nil
             }
@@ -52,8 +56,7 @@ public class Image: ImageSource {
 
     public func process() {
         for var target in targets {
-            let commandBuffer = MetalDevice.sharedInstance.newCommandBuffer()
-
+            let commandBuffer = context.newCommandBuffer()
             target.inputTexture = outputTexture
             target.newFrameReady(at: kCMTimeZero, at: 0, using: commandBuffer)
         }

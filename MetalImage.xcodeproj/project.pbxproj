@@ -17,8 +17,8 @@
 		752B1D07201E4CFA00FBDA98 /* MovieInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF9201E4CF900FBDA98 /* MovieInput.swift */; };
 		752B1D08201E4CFA00FBDA98 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFA201E4CFA00FBDA98 /* Protocols.swift */; };
 		752B1D09201E4CFA00FBDA98 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFA201E4CFA00FBDA98 /* Protocols.swift */; };
-		752B1D0A201E4CFA00FBDA98 /* MetalDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFB201E4CFA00FBDA98 /* MetalDevice.swift */; };
-		752B1D0B201E4CFA00FBDA98 /* MetalDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFB201E4CFA00FBDA98 /* MetalDevice.swift */; };
+		752B1D0A201E4CFA00FBDA98 /* MetalContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */; };
+		752B1D0B201E4CFA00FBDA98 /* MetalContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */; };
 		752B1D0C201E4CFA00FBDA98 /* MovieOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFC201E4CFA00FBDA98 /* MovieOutput.swift */; };
 		752B1D0D201E4CFA00FBDA98 /* MovieOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFC201E4CFA00FBDA98 /* MovieOutput.swift */; };
 		752B1D0E201E4CFA00FBDA98 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFD201E4CFA00FBDA98 /* RenderView.swift */; };
@@ -33,6 +33,10 @@
 		752B1D1A201E504B00FBDA98 /* AtomicQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1D18201E504B00FBDA98 /* AtomicQueue.swift */; };
 		752B1D1B201E555800FBDA98 /* DisplayShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */; };
 		752B1D1C201E555900FBDA98 /* DisplayShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */; };
+		752B1DD1201E72BB00FBDA98 /* DisplayShaders.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */; };
+		752B1DD3201E72C600FBDA98 /* DisplayShaders.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */; };
+		7552F65C20211840008A0300 /* Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7552F65B20211840008A0300 /* Static.swift */; };
+		7552F65D20211840008A0300 /* Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7552F65B20211840008A0300 /* Static.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +49,29 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		752B1DD0201E72B000FBDA98 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				752B1DD1201E72BB00FBDA98 /* DisplayShaders.metal in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		752B1DD2201E72C000FBDA98 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				752B1DD3201E72C600FBDA98 /* DisplayShaders.metal in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		752B1CC1201E4B4C00FBDA98 /* MetalImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MetalImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		752B1CC5201E4B4C00FBDA98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -56,7 +83,7 @@
 		752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalImageLog.swift; sourceTree = "<group>"; };
 		752B1CF9201E4CF900FBDA98 /* MovieInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieInput.swift; sourceTree = "<group>"; };
 		752B1CFA201E4CFA00FBDA98 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
-		752B1CFB201E4CFA00FBDA98 /* MetalDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalDevice.swift; sourceTree = "<group>"; };
+		752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalContext.swift; sourceTree = "<group>"; };
 		752B1CFC201E4CFA00FBDA98 /* MovieOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieOutput.swift; sourceTree = "<group>"; };
 		752B1CFD201E4CFA00FBDA98 /* RenderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
 		752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = DisplayShaders.metal; sourceTree = "<group>"; };
@@ -64,6 +91,7 @@
 		752B1D00201E4CFA00FBDA98 /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		752B1D01201E4CFA00FBDA98 /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		752B1D18201E504B00FBDA98 /* AtomicQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AtomicQueue.swift; sourceTree = "<group>"; };
+		7552F65B20211840008A0300 /* Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Static.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,18 +142,19 @@
 		752B1CC3201E4B4C00FBDA98 /* MetalImage */ = {
 			isa = PBXGroup;
 			children = (
+				7552F65B20211840008A0300 /* Static.swift */,
+				752B1CFA201E4CFA00FBDA98 /* Protocols.swift */,
+				752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */,
 				752B1D18201E504B00FBDA98 /* AtomicQueue.swift */,
-				752B1CFF201E4CFA00FBDA98 /* AudioPlayer.swift */,
 				752B1CF7201E4CF900FBDA98 /* BasicFilter.swift */,
 				752B1D00201E4CFA00FBDA98 /* Camera.swift */,
 				752B1D01201E4CFA00FBDA98 /* Image.swift */,
-				752B1CFB201E4CFA00FBDA98 /* MetalDevice.swift */,
 				752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */,
 				752B1CF9201E4CF900FBDA98 /* MovieInput.swift */,
 				752B1CFC201E4CFA00FBDA98 /* MovieOutput.swift */,
-				752B1CFA201E4CFA00FBDA98 /* Protocols.swift */,
 				752B1CFD201E4CFA00FBDA98 /* RenderView.swift */,
 				752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */,
+				752B1CFF201E4CFA00FBDA98 /* AudioPlayer.swift */,
 				752B1CC5201E4B4C00FBDA98 /* Info.plist */,
 			);
 			path = MetalImage;
@@ -168,6 +197,7 @@
 				752B1CBD201E4B4C00FBDA98 /* Frameworks */,
 				752B1CBE201E4B4C00FBDA98 /* Headers */,
 				752B1CBF201E4B4C00FBDA98 /* Resources */,
+				752B1DD0201E72B000FBDA98 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -204,6 +234,7 @@
 				752B1CDC201E4B6500FBDA98 /* Frameworks */,
 				752B1CDD201E4B6500FBDA98 /* Headers */,
 				752B1CDE201E4B6500FBDA98 /* Resources */,
+				752B1DD2201E72C000FBDA98 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -291,9 +322,10 @@
 				752B1D04201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */,
 				752B1D1C201E555900FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D06201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
+				7552F65C20211840008A0300 /* Static.swift in Sources */,
 				752B1D19201E504B00FBDA98 /* AtomicQueue.swift in Sources */,
 				752B1D12201E4CFA00FBDA98 /* AudioPlayer.swift in Sources */,
-				752B1D0A201E4CFA00FBDA98 /* MetalDevice.swift in Sources */,
+				752B1D0A201E4CFA00FBDA98 /* MetalContext.swift in Sources */,
 				752B1D0C201E4CFA00FBDA98 /* MovieOutput.swift in Sources */,
 				752B1D02201E4CFA00FBDA98 /* BasicFilter.swift in Sources */,
 				752B1D14201E4CFA00FBDA98 /* Camera.swift in Sources */,
@@ -318,9 +350,10 @@
 				752B1D05201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */,
 				752B1D1B201E555800FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D07201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
+				7552F65D20211840008A0300 /* Static.swift in Sources */,
 				752B1D1A201E504B00FBDA98 /* AtomicQueue.swift in Sources */,
 				752B1D13201E4CFA00FBDA98 /* AudioPlayer.swift in Sources */,
-				752B1D0B201E4CFA00FBDA98 /* MetalDevice.swift in Sources */,
+				752B1D0B201E4CFA00FBDA98 /* MetalContext.swift in Sources */,
 				752B1D0D201E4CFA00FBDA98 /* MovieOutput.swift in Sources */,
 				752B1D03201E4CFA00FBDA98 /* BasicFilter.swift in Sources */,
 				752B1D15201E4CFA00FBDA98 /* Camera.swift in Sources */,

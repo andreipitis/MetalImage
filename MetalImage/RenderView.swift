@@ -70,17 +70,51 @@ public class RenderView: View, ImageConsumer {
     public var inputTexture: MTLTexture?
     private(set) public var outputTexture: MTLTexture?
     
-    private let metalLayer: CAMetalLayer? = CAMetalLayer()
+    private let metalLayer: CAMetalLayer = CAMetalLayer()
 
     private var renderPipelineState: MTLRenderPipelineState?
 
-    private let indexBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: indexData)
-    private let vertexBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: vertexData)
-    private let textureBuffer: MTLBuffer = MetalDevice.sharedInstance.buffer(array: TextureRotation.none.rotation())
+    private var indexBuffer: MTLBuffer!
+    private var vertexBuffer: MTLBuffer!
+    private var textureBuffer: MTLBuffer!
+
+    private var metalContext: MetalContext?
+
+    private var outputSize: CGSize = .zero
 
     public var fillMode: FillMode = .stretch
 
-    private var outputSize: CGSize = .zero
+    public var context: MetalContext? {
+        set {
+            guard let context = newValue else {
+                return
+            }
+
+            metalContext = context
+
+            metalLayer.device = context.device
+
+            do {
+                renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
+            } catch {
+                Log("Could not create render pipeline state.")
+            }
+
+            indexBuffer = context.buffer(array: Static.indexData)
+            vertexBuffer = context.buffer(array: Static.vertexData)
+            textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
+        }
+
+        get {
+            return metalContext
+        }
+    }
+
+    public convenience init(frame: CGRect, context: MetalContext) {
+        self.init(frame: frame)
+
+        self.context = context
+    }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -93,36 +127,27 @@ public class RenderView: View, ImageConsumer {
     }
 
     private func commonInit() {
-        if let metalLayer = metalLayer {
-            let device = MetalDevice.sharedInstance.device
-            metalLayer.device = device
-            metalLayer.pixelFormat = .bgra8Unorm
-            metalLayer.framebufferOnly = false
-            metalLayer.frame = bounds
+        metalLayer.pixelFormat = .bgra8Unorm
+        metalLayer.framebufferOnly = false
+        metalLayer.frame = bounds
 
-            #if os(iOS)
+        #if os(iOS)
             metalLayer.contentsScale = UIScreen.main.scale
             layer.addSublayer(metalLayer)
-            #elseif os(OSX)
+        #elseif os(OSX)
             layer = metalLayer
 
             if let scale = NSScreen.main?.backingScaleFactor {
                 metalLayer.contentsScale = scale
             }
-
-            #endif
-        }
-
-        do {
-            renderPipelineState = try MetalDevice.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
-        } catch {
-            Log("Could not create render pipeline state.")
-        }
+        #endif
     }
 
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
-        if let drawable = metalLayer?.nextDrawable() {
-            if let size = metalLayer?.bounds.size, outputSize != size {
+        if let drawable = metalLayer.nextDrawable() {
+            let size = metalLayer.bounds.size
+
+            if outputSize != size {
                 outputSize = size
                 updateTextureCoordinates()
             }
@@ -138,7 +163,7 @@ public class RenderView: View, ImageConsumer {
             return
         }
 
-        let content: [Float] = vertexData
+        let content: [Float] = Static.vertexData
 
         let inputSize = CGSize(width: width, height: height)
         let alteredVertexCoordinates = fillMode.convert(vertices: content, fromSize: inputSize, toSize: outputSize)

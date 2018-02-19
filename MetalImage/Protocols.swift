@@ -31,7 +31,6 @@ infix operator -->: AdditionPrecedence
     return destination
 }
 
-
 extension ImageSource {
     mutating func add(target: ImageConsumer) {
         targets.append(target)
