@@ -22,41 +22,41 @@ class Log {
 
     class func debug(_ input: Any, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
         #if DEBUG
-            guard self.level.rawValue >= LogLevel.debug.rawValue else {
+            guard self.level.rawValue <= LogLevel.debug.rawValue else {
                 return
             }
 
-            print("\u{001B}[0;34m\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("◽️\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
         #endif
     }
 
     class func info(_ input: Any, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
         #if DEBUG
-            guard self.level.rawValue >= LogLevel.info.rawValue else {
+            guard self.level.rawValue <= LogLevel.info.rawValue else {
                 return
             }
 
-            print("\n\u{001B}[0;32m\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🔷\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
         #endif
     }
 
     class func warning(_ input: Any, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
         #if DEBUG
-            guard self.level.rawValue >= LogLevel.warning.rawValue else {
+            guard self.level.rawValue <= LogLevel.warning.rawValue else {
                 return
             }
 
-            print("\n\u{001B}[0;33m\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🔶\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
         #endif
     }
 
     class func error(_ input: Any, file: StaticString = #file, function: StaticString = #function, line: Int = #line) {
         #if DEBUG
-            guard self.level.rawValue >= LogLevel.error.rawValue else {
+            guard self.level.rawValue <= LogLevel.error.rawValue else {
                 return
             }
 
-            print("\n\u{001B}[0;31m\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🛑\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
         #endif
     }
 }

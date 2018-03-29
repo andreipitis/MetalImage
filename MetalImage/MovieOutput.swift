@@ -68,7 +68,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriterVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoOutputSettings)
         assetWriterVideoInput.expectsMediaDataInRealTime = liveVideo
 
-        
+
         let audioOutputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM,
                                                   AVNumberOfChannelsKey: 1,
                                                   AVSampleRateKey: 44100.0,
@@ -85,7 +85,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
                 assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
             }
         #endif
-        
+
         assetWriterAudioInput.expectsMediaDataInRealTime = liveVideo
 
         let sourcePixelBufferAttributes: [String: Any] = [
