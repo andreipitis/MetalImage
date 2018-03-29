@@ -39,6 +39,15 @@ public class BaseComputeFilter: ImageSource, ImageConsumer {
         Logger.debug("Deinit Base Compute Filter")
     }
 
+    /**
+     This methods will be called each frame. Make sure your implementation is as fast as possible as it may lead to slower performance of the pipeline.
+
+     - Textures 0 and 1 are reserved for the input and output textures.
+     */
+    public func configure(computeEncoder: MTLComputeCommandEncoder) {
+        assert(false, "Should be implemented by subclasses!")
+    }
+
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
         autoreleasepool {
             var nextBuffer = buffer
@@ -66,6 +75,8 @@ public class BaseComputeFilter: ImageSource, ImageConsumer {
         computeCommandEncoder.pushDebugGroup("Base Compute Filter - Compute Encoder")
         computeCommandEncoder.setTexture(inputTexture, index: 0)
         computeCommandEncoder.setTexture(outputTexture, index: 1)
+
+        configure(computeEncoder: computeCommandEncoder)
 
         computeCommandEncoder.setComputePipelineState(computePipelineState)
 
@@ -123,6 +134,16 @@ public class BaseRenderFilter: ImageSource, ImageConsumer {
         Logger.debug("Deinit Base Render Filter")
     }
 
+    /**
+     This methods will be called each frame. Make sure your implementation is as fast as possible as it may lead to slower performance of the pipeline.
+
+     - Vertex Buffers 0 and 1 are reserved for the vertices and texture coordinates.
+     - Fragment Texture 0 is reserved for the input texture.
+     */
+    public func configure(renderEncoder: MTLRenderCommandEncoder) {
+        assert(false, "Should be implemented by subclasses!")
+    }
+
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
         autoreleasepool {
             var nextBuffer = buffer
@@ -156,6 +177,8 @@ public class BaseRenderFilter: ImageSource, ImageConsumer {
         renderCommandEncoder.setFragmentTexture(inputTexture, index: 0)
         renderCommandEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         renderCommandEncoder.setVertexBuffer(textureBuffer, offset: 0, index: 1)
+
+        configure(renderEncoder: renderCommandEncoder)
 
         renderCommandEncoder.setRenderPipelineState(renderPipelineState)
 

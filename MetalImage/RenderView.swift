@@ -95,7 +95,7 @@ public class RenderView: View, ImageConsumer {
             metalLayer.device = context.device
 
             do {
-                renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
+                renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "passthroughVertex", fragmentFunctionName: "passthroughFragment")
             } catch {
                 Logger.error("Could not create render pipeline state.")
             }

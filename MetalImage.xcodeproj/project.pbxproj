@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		751A1473206D38420045B5D6 /* GrayscaleFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751A1472206D38420045B5D6 /* GrayscaleFilter.swift */; };
+		751A1474206D38420045B5D6 /* GrayscaleFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751A1472206D38420045B5D6 /* GrayscaleFilter.swift */; };
+		751A1476206D38620045B5D6 /* PassthroughFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751A1475206D38620045B5D6 /* PassthroughFilter.swift */; };
+		751A1477206D38620045B5D6 /* PassthroughFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751A1475206D38620045B5D6 /* PassthroughFilter.swift */; };
 		752B1CCB201E4B4C00FBDA98 /* MetalImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 752B1CC1201E4B4C00FBDA98 /* MetalImage.framework */; };
 		752B1CD0201E4B4C00FBDA98 /* MetalImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CCF201E4B4C00FBDA98 /* MetalImageTests.swift */; };
 		752B1D02201E4CFA00FBDA98 /* BaseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */; };
@@ -75,6 +79,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		751A1472206D38420045B5D6 /* GrayscaleFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleFilter.swift; sourceTree = "<group>"; };
+		751A1475206D38620045B5D6 /* PassthroughFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassthroughFilter.swift; sourceTree = "<group>"; };
 		752B1CC1201E4B4C00FBDA98 /* MetalImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MetalImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		752B1CC5201E4B4C00FBDA98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		752B1CCA201E4B4C00FBDA98 /* MetalImageTests_macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MetalImageTests_macOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,6 +180,8 @@
 			isa = PBXGroup;
 			children = (
 				752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */,
+				751A1472206D38420045B5D6 /* GrayscaleFilter.swift */,
+				751A1475206D38620045B5D6 /* PassthroughFilter.swift */,
 			);
 			path = Filters;
 			sourceTree = "<group>";
@@ -347,6 +355,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				751A1476206D38620045B5D6 /* PassthroughFilter.swift in Sources */,
 				752B1D04201E4CFA00FBDA98 /* Log.swift in Sources */,
 				752B1D1C201E555900FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D06201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
@@ -360,6 +369,7 @@
 				752B1D14201E4CFA00FBDA98 /* Camera.swift in Sources */,
 				752B1D0E201E4CFA00FBDA98 /* RenderView.swift in Sources */,
 				752B1D16201E4CFA00FBDA98 /* Image.swift in Sources */,
+				751A1473206D38420045B5D6 /* GrayscaleFilter.swift in Sources */,
 				752B1D08201E4CFA00FBDA98 /* Protocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -376,6 +386,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				751A1477206D38620045B5D6 /* PassthroughFilter.swift in Sources */,
 				752B1D05201E4CFA00FBDA98 /* Log.swift in Sources */,
 				752B1D1B201E555800FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D07201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
@@ -389,6 +400,7 @@
 				752B1D15201E4CFA00FBDA98 /* Camera.swift in Sources */,
 				752B1D0F201E4CFA00FBDA98 /* RenderView.swift in Sources */,
 				752B1D17201E4CFA00FBDA98 /* Image.swift in Sources */,
+				751A1474206D38420045B5D6 /* GrayscaleFilter.swift in Sources */,
 				752B1D09201E4CFA00FBDA98 /* Protocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

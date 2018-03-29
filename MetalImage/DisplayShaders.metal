@@ -14,7 +14,7 @@ struct VertexOut {
     float2 textureCoorinates;
 };
 
-vertex VertexOut basic_vertex(const device packed_float2* vertex_array [[ buffer(0) ]],
+vertex VertexOut passthroughVertex(const device packed_float2* vertex_array [[ buffer(0) ]],
                               const device packed_float2* texture_array [[ buffer(1) ]],
                               unsigned int vid [[ vertex_id ]])
 {
@@ -31,14 +31,14 @@ vertex VertexOut basic_vertex(const device packed_float2* vertex_array [[ buffer
     return vertexData;
 }
 
-fragment half4 basic_fragment(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> tex2d [[texture(0)]]) {
-    constexpr sampler sampler2d(filter::linear);
+fragment half4 passthroughFragment(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> tex2d [[texture(0)]]) {
+    constexpr sampler sampler2d(filter::nearest);
     
     return half4(tex2d.sample(sampler2d, fragmentIn.textureCoorinates));
 }
 
 // Grayscale compute shader
-kernel void basic_compute(texture2d<half, access::read>  inTexture   [[ texture(0) ]],
+kernel void grayscaleCompute(texture2d<half, access::read>  inTexture   [[ texture(0) ]],
                           texture2d<half, access::write> outTexture  [[ texture(1) ]],
                           uint2                          gid         [[ thread_position_in_grid ]])
 {

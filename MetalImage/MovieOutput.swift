@@ -98,7 +98,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriter.add(assetWriterVideoInput)
 
         do {
-            renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
+            renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "passthroughVertex", fragmentFunctionName: "passthroughFragment")
         } catch {
             Logger.error("Could not create render pipeline state.")
         }
