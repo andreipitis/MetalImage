@@ -128,7 +128,7 @@ public class RenderView: View, ImageConsumer {
 
     private func commonInit() {
         metalLayer.pixelFormat = .bgra8Unorm
-        metalLayer.framebufferOnly = false
+        metalLayer.framebufferOnly = true
         metalLayer.frame = bounds
 
         #if os(iOS)
@@ -154,8 +154,9 @@ public class RenderView: View, ImageConsumer {
 
             displayWithCommandBuffer(buffer: buffer, outputTexture: drawable.texture)
             buffer.present(drawable)
-            buffer.commit()
         }
+
+        buffer.commit()
     }
 
     private func updateTextureCoordinates() {

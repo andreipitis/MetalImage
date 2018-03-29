@@ -214,7 +214,7 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDa
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         autoreleasepool {
             if output is AVCaptureVideoDataOutput {
-                if let pixelBuffer: CVImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
+                if let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
                     let width = CVPixelBufferGetWidth(pixelBuffer)
                     let height = CVPixelBufferGetHeight(pixelBuffer)
 

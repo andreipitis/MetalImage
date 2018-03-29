@@ -304,7 +304,7 @@ public class MovieInput: ImageSource {
     }
 
     private func configureRealtimePlaybackAudio(audioTracks: [AVAssetTrack], playerItem: AVPlayerItem) {
-        let rawPointerSelf = Unmanaged.passRetained(self).toOpaque()
+        let rawPointerSelf = Unmanaged.passUnretained(self).toOpaque()
 
         var callbacks = MTAudioProcessingTapCallbacks(
             version: kMTAudioProcessingTapCallbacksVersion_0,

@@ -28,12 +28,16 @@ public class Image: ImageSource {
         let textureLoader = MTKTextureLoader(device: context.device)
 
         let options: [MTKTextureLoader.Option: Any] = [
-            .textureStorageMode:   MTLStorageMode.private,
-            .textureUsage:         MTLTextureUsage.shaderRead,
-            .SRGB:                 0
+            .textureStorageMode:   MTLStorageMode.private.rawValue as NSNumber,
+            .textureUsage:         MTLTextureUsage.shaderRead.rawValue as NSNumber,
+            .SRGB:                 false as NSNumber
         ]
 
-        outputTexture = try? textureLoader.newTexture(cgImage: cgImage, options: options)
+        do {
+            outputTexture = try textureLoader.newTexture(cgImage: cgImage, options: options)
+        } catch {
+            Log(error)
+        }
     }
 
     public convenience init?(fileName: String, context: MetalContext) {

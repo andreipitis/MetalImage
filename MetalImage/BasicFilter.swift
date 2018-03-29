@@ -17,45 +17,26 @@ struct PipelineStateConfiguration {
     let computeShader: String
 }
 
-public class BasicFilter: ImageSource, ImageConsumer {
+public class BaseComputeFilter: ImageSource, ImageConsumer {
     public var targets: [ImageConsumer] = []
-    
+
     public var inputTexture: MTLTexture?
     public private(set) var outputTexture: MTLTexture?
 
     private let context: MetalContext
 
     private var computePipelineState: MTLComputePipelineState?
-    private var renderPipelineState: MTLRenderPipelineState?
-
-    private var indexBuffer: MTLBuffer
-    private var vertexBuffer: MTLBuffer
-    private var textureBuffer: MTLBuffer
-
-    public init(vertexShader: String, fragmentShader: String, context: MetalContext) {
-        let pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: vertexShader, fragmentShader: fragmentShader, computeShader: "")
-
-        self.context = context
-        indexBuffer = context.buffer(array: Static.indexData)
-        vertexBuffer = context.buffer(array: Static.vertexData)
-        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
-
-        commonInit(pipelineState: pipelineState, context: context)
-    }
 
     public init(computeShader: String, context: MetalContext) {
         let pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: "", fragmentShader: "", computeShader: computeShader)
 
         self.context = context
-        indexBuffer = context.buffer(array: Static.indexData)
-        vertexBuffer = context.buffer(array: Static.vertexData)
-        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
 
-        commonInit(pipelineState: pipelineState, context: context)
+        configurePipeline(pipelineState: pipelineState, context: context)
     }
 
     deinit {
-        Log("Deinit Filter")
+        Log("Deinit Base Compute Filter")
     }
 
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
@@ -78,49 +59,114 @@ public class BasicFilter: ImageSource, ImageConsumer {
             outputTexture = buffer.device.makeTexture(descriptor: textureDescriptor)!
         }
 
-        if let renderPipelineState = renderPipelineState {
-            let renderPassDescriptor = configureRenderPassDescriptor(texture: outputTexture)
-            guard let renderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
-                return
-            }
-
-            renderCommandEncoder.pushDebugGroup("Base Filter Render Encoder")
-            renderCommandEncoder.setFragmentTexture(inputTexture, index: 0)
-            renderCommandEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-            renderCommandEncoder.setVertexBuffer(textureBuffer, offset: 0, index: 1)
-
-            renderCommandEncoder.setRenderPipelineState(renderPipelineState)
-
-            renderCommandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: indexBuffer, indexBufferOffset: 0)
-
-            renderCommandEncoder.endEncoding()
-
-            renderCommandEncoder.popDebugGroup()
-
-            target.inputTexture = outputTexture
-            target.newFrameReady(at: time, at: 0, using: buffer)
-
-        } else if let computePipelineState = computePipelineState {
-            guard let computeCommandEncoder = buffer.makeComputeCommandEncoder() else {
-                return
-            }
-
-            computeCommandEncoder.pushDebugGroup("Base Filter Compute Encoder")
-            computeCommandEncoder.setTexture(inputTexture, index: 0)
-            computeCommandEncoder.setTexture(outputTexture, index: 1)
-
-            computeCommandEncoder.setComputePipelineState(computePipelineState)
-
-            let threadGroupCouts = MTLSize(width: 8, height: 8, depth: 1)
-            let threadGroups = MTLSize(width: inputTexture!.width / threadGroupCouts.width, height: inputTexture!.height / threadGroupCouts.height, depth: 1)
-            computeCommandEncoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadGroupCouts)
-
-            computeCommandEncoder.endEncoding()
-            computeCommandEncoder.popDebugGroup()
-
-            target.inputTexture = outputTexture
-            target.newFrameReady(at: time, at: 0, using: buffer)
+        guard let computePipelineState = computePipelineState, let computeCommandEncoder = buffer.makeComputeCommandEncoder() else {
+            return
         }
+
+        computeCommandEncoder.pushDebugGroup("Base Compute Filter - Compute Encoder")
+        computeCommandEncoder.setTexture(inputTexture, index: 0)
+        computeCommandEncoder.setTexture(outputTexture, index: 1)
+
+        computeCommandEncoder.setComputePipelineState(computePipelineState)
+
+        let threadGroupCouts = MTLSize(width: 8, height: 8, depth: 1)
+        let threadGroups = MTLSize(width: inputTexture!.width / threadGroupCouts.width, height: inputTexture!.height / threadGroupCouts.height, depth: 1)
+        computeCommandEncoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadGroupCouts)
+
+        computeCommandEncoder.endEncoding()
+        computeCommandEncoder.popDebugGroup()
+
+        target.inputTexture = outputTexture
+        target.newFrameReady(at: time, at: 0, using: buffer)
+    }
+
+    private func configurePipeline(pipelineState: PipelineStateConfiguration, context: MetalContext) {
+        guard computePipelineState == nil else {
+            return
+        }
+
+        do {
+            computePipelineState = try context.createComputePipeline(computeFunctionName: pipelineState.computeShader)
+        } catch {
+            Log("Could not create compute pipeline state.")
+        }
+    }
+}
+
+public class BaseRenderFilter: ImageSource, ImageConsumer {
+    public var targets: [ImageConsumer] = []
+    
+    public var inputTexture: MTLTexture?
+    public private(set) var outputTexture: MTLTexture?
+
+    private let context: MetalContext
+
+    private var computePipelineState: MTLComputePipelineState?
+    private var renderPipelineState: MTLRenderPipelineState?
+
+    private var indexBuffer: MTLBuffer
+    private var vertexBuffer: MTLBuffer
+    private var textureBuffer: MTLBuffer
+
+    public init(vertexShader: String, fragmentShader: String, context: MetalContext) {
+        let pipelineState = PipelineStateConfiguration(pixelFormat: .bgra8Unorm, vertexShader: vertexShader, fragmentShader: fragmentShader, computeShader: "")
+
+        self.context = context
+        indexBuffer = context.buffer(array: Static.indexData)
+        vertexBuffer = context.buffer(array: Static.vertexData)
+        textureBuffer = context.buffer(array: Static.TextureRotation.none.rotation())
+
+        configurePipeline(pipelineState: pipelineState, context: context)
+    }
+
+    deinit {
+        Log("Deinit Base Render Filter")
+    }
+
+    public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
+        autoreleasepool {
+            var nextBuffer = buffer
+            for var target in targets {
+                calculateWithCommandBuffer(buffer: nextBuffer, target: &target, at: time)
+                nextBuffer = context.newCommandBuffer()
+            }
+        }
+    }
+
+    private func calculateWithCommandBuffer(buffer: MTLCommandBuffer, target: inout ImageConsumer, at time: CMTime) {
+        if outputTexture == nil {
+            let textureDescriptor = MTLTextureDescriptor()
+            textureDescriptor.pixelFormat = .bgra8Unorm
+            textureDescriptor.usage = [.shaderRead, .renderTarget, .shaderWrite]
+            textureDescriptor.width = inputTexture!.width
+            textureDescriptor.height = inputTexture!.height
+            outputTexture = buffer.device.makeTexture(descriptor: textureDescriptor)!
+        }
+
+        guard let renderPipelineState = renderPipelineState else {
+            return
+        }
+
+        let renderPassDescriptor = configureRenderPassDescriptor(texture: outputTexture)
+        guard let renderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+            return
+        }
+
+        renderCommandEncoder.pushDebugGroup("Base Render Filter - Render Encoder")
+        renderCommandEncoder.setFragmentTexture(inputTexture, index: 0)
+        renderCommandEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        renderCommandEncoder.setVertexBuffer(textureBuffer, offset: 0, index: 1)
+
+        renderCommandEncoder.setRenderPipelineState(renderPipelineState)
+
+        renderCommandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: 6, indexType: .uint16, indexBuffer: indexBuffer, indexBufferOffset: 0)
+
+        renderCommandEncoder.endEncoding()
+
+        renderCommandEncoder.popDebugGroup()
+
+        target.inputTexture = outputTexture
+        target.newFrameReady(at: time, at: 0, using: buffer)
     }
 
     private func configureRenderPassDescriptor(texture: MTLTexture?) -> MTLRenderPassDescriptor {
@@ -134,29 +180,14 @@ public class BasicFilter: ImageSource, ImageConsumer {
     }
 
     private func configurePipeline(pipelineState: PipelineStateConfiguration, context: MetalContext) {
-        if pipelineState.computeShader.count > 0 {
-            if computePipelineState != nil {
-                return
-            }
-            do {
-                computePipelineState = try context.createComputePipeline(computeFunctionName: pipelineState.computeShader)
-            } catch {
-                Log("Could not create compute pipeline state.")
-            }
-        } else {
-            if renderPipelineState != nil {
-                return
-            }
-
-            do {
-                renderPipelineState = try context.createRenderPipeline(vertexFunctionName: pipelineState.vertexShader, fragmentFunctionName: pipelineState.fragmentShader)
-            } catch {
-                Log("Could not create render pipeline state.")
-            }
+        guard renderPipelineState == nil else {
+            return
         }
-    }
-    
-    private func commonInit(pipelineState: PipelineStateConfiguration, context: MetalContext) {
-        configurePipeline(pipelineState: pipelineState, context: context)
+
+        do {
+            renderPipelineState = try context.createRenderPipeline(vertexFunctionName: pipelineState.vertexShader, fragmentFunctionName: pipelineState.fragmentShader)
+        } catch {
+            Log("Could not create render pipeline state.")
+        }
     }
 }
