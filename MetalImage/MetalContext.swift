@@ -94,7 +94,6 @@ public class MetalContext {
         let result: CVReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &metalTextureCache)
 
         guard result == kCVReturnSuccess, let textureCache = metalTextureCache else {
-            Log("Could not create texture cache")
             return nil
         }
 

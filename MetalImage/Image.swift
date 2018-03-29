@@ -10,6 +10,21 @@ import Foundation
 import CoreMedia
 import MetalKit
 
+#if os(iOS)
+    public typealias MIImage = UIImage
+#elseif os(OSX)
+    public typealias MIImage = NSImage
+
+    extension NSImage {
+        var cgImage: CGImage {
+            var imageRect: CGRect = CGRect(x: 0.0, y: 0.0, width: self.size.width, height: self.size.height)
+            let cgImage = self.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
+
+            return cgImage!
+        }
+    }
+#endif
+
 public class Image: ImageSource {
     public var targets: [ImageConsumer] = []
 
@@ -36,26 +51,21 @@ public class Image: ImageSource {
         do {
             outputTexture = try textureLoader.newTexture(cgImage: cgImage, options: options)
         } catch {
-            Log(error)
+            Log.error(error)
+            return nil
         }
     }
 
     public convenience init?(fileName: String, context: MetalContext) {
-        #if os(iOS)
-            if let image = UIImage(named: fileName) {
-                self.init(cgImage: image.cgImage, context: context)
-            } else {
-                return nil
-            }
-        #elseif os(OSX)
-            if let image = NSImage(named: NSImage.Name(rawValue: fileName)) {
-                var imageRect: CGRect = CGRect(x: 0.0, y: 0.0, width: image.size.width, height: image.size.height)
-                let cgImage = image.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
-                self.init(cgImage: cgImage, context: context)
-            } else {
-                return nil
-            }
+        #if os(OSX)
+            let fileName = NSImage.Name(rawValue: fileName)
         #endif
+
+        if let image = MIImage(named: fileName) {
+            self.init(cgImage: image.cgImage, context: context)
+        } else {
+            return nil
+        }
     }
 
     public func process() {

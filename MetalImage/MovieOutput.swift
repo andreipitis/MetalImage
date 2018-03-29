@@ -90,7 +90,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         do {
             renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
         } catch {
-            Log("Could not create render pipeline state.")
+            Log.error("Could not create render pipeline state.")
         }
 
         indexBuffer = context.buffer(array: Static.indexData)
@@ -107,12 +107,12 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
     }
 
     deinit {
-        Log("Deinit Movie Output")
+        Log.debug("Deinit Movie Output")
     }
 
     public func startRecording() {
         guard isRecording == false else {
-            Log("Tried to start an already running recording.")
+            Log.warning("Tried to start an already running recording.")
             return
         }
         assetWriter.startWriting()
@@ -123,7 +123,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
 
     public func endRecording(_ completionHandler: @escaping () -> ()) {
         guard isRecording == true else {
-            Log("Tried to stop an already stopped recording.")
+            Log.warning("Tried to stop an already stopped recording.")
             return
         }
 
@@ -159,7 +159,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
                 if strongSelf.assetWriterAudioInput.isReadyForMoreMediaData == false {
                     strongSelf.assetWriterAudioInput.markAsFinished()
 
-                    Log("Audio writer can not take any more data.")
+                    Log.debug("Audio writer can not take any more data.")
                     return
                 }
 
@@ -180,13 +180,13 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             if strongSelf.assetWriterVideoInput.isReadyForMoreMediaData == false {
                 strongSelf.assetWriterVideoInput.markAsFinished()
 
-                Log("Video writer can not take any more data.")
+                Log.debug("Video writer can not take any more data.")
                 return
             }
 
             if let item = strongSelf.videoQueue.dequeue() {
                 if strongSelf.assetWriterPixelBufferInput.append(item.sampleBuffer, withPresentationTime: item.presentationTime) == false {
-                    Log("Error appending pixel buffer")
+                    Log.error("Error appending pixel buffer")
                 }
             }
         }
@@ -198,7 +198,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         }
 
         guard assetWriter.status != .failed else {
-            Log("Error, AVWriter failed: \(String(describing: assetWriter.error))")
+            Log.error("Error, AVWriter failed: \(String(describing: assetWriter.error))")
             return
         }
 
@@ -275,7 +275,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             previousTime = time
 
             guard let pixelBufferPool = assetWriterPixelBufferInput.pixelBufferPool else {
-                Log("Could not retrieve pixel buffer pool")
+                Log.error("Could not retrieve pixel buffer pool")
                 return
             }
 
@@ -283,13 +283,13 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             let result = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
 
             guard result == kCVReturnSuccess, let finalPixelBuffer = pixelBuffer, let texture = outputTexture else {
-                Log("Could not get a pixel buffer from the pool")
+                Log.error("Could not get a pixel buffer from the pool")
                 return
             }
 
             CVPixelBufferLockBaseAddress(finalPixelBuffer, [])
             guard let pixelBufferBytes = CVPixelBufferGetBaseAddress(finalPixelBuffer) else {
-                Log("Could not get pixel buffer bytes.")
+                Log.error("Could not get pixel buffer bytes.")
                 CVPixelBufferUnlockBaseAddress(finalPixelBuffer, [])
 
                 return

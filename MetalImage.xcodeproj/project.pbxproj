@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		752B1CCB201E4B4C00FBDA98 /* MetalImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 752B1CC1201E4B4C00FBDA98 /* MetalImage.framework */; };
 		752B1CD0201E4B4C00FBDA98 /* MetalImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CCF201E4B4C00FBDA98 /* MetalImageTests.swift */; };
-		752B1D02201E4CFA00FBDA98 /* BasicFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF7201E4CF900FBDA98 /* BasicFilter.swift */; };
-		752B1D03201E4CFA00FBDA98 /* BasicFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF7201E4CF900FBDA98 /* BasicFilter.swift */; };
-		752B1D04201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */; };
-		752B1D05201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */; };
+		752B1D02201E4CFA00FBDA98 /* BaseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */; };
+		752B1D03201E4CFA00FBDA98 /* BaseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */; };
+		752B1D04201E4CFA00FBDA98 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF8201E4CF900FBDA98 /* Log.swift */; };
+		752B1D05201E4CFA00FBDA98 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF8201E4CF900FBDA98 /* Log.swift */; };
 		752B1D06201E4CFA00FBDA98 /* MovieInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF9201E4CF900FBDA98 /* MovieInput.swift */; };
 		752B1D07201E4CFA00FBDA98 /* MovieInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CF9201E4CF900FBDA98 /* MovieInput.swift */; };
 		752B1D08201E4CFA00FBDA98 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752B1CFA201E4CFA00FBDA98 /* Protocols.swift */; };
@@ -37,6 +37,8 @@
 		752B1DD3201E72C600FBDA98 /* DisplayShaders.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */; };
 		7552F65C20211840008A0300 /* Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7552F65B20211840008A0300 /* Static.swift */; };
 		7552F65D20211840008A0300 /* Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7552F65B20211840008A0300 /* Static.swift */; };
+		75EF9C51206CC41E00CC0EE0 /* DisplayLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75EF9C50206CC41E00CC0EE0 /* DisplayLink.swift */; };
+		75EF9C52206CC41E00CC0EE0 /* DisplayLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75EF9C50206CC41E00CC0EE0 /* DisplayLink.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,8 +81,8 @@
 		752B1CCF201E4B4C00FBDA98 /* MetalImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalImageTests.swift; sourceTree = "<group>"; };
 		752B1CD1201E4B4D00FBDA98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		752B1CE0201E4B6500FBDA98 /* MetalImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MetalImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		752B1CF7201E4CF900FBDA98 /* BasicFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicFilter.swift; sourceTree = "<group>"; };
-		752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalImageLog.swift; sourceTree = "<group>"; };
+		752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseFilter.swift; sourceTree = "<group>"; };
+		752B1CF8201E4CF900FBDA98 /* Log.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		752B1CF9201E4CF900FBDA98 /* MovieInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieInput.swift; sourceTree = "<group>"; };
 		752B1CFA201E4CFA00FBDA98 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalContext.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 		752B1D01201E4CFA00FBDA98 /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		752B1D18201E504B00FBDA98 /* AtomicQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AtomicQueue.swift; sourceTree = "<group>"; };
 		7552F65B20211840008A0300 /* Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Static.swift; sourceTree = "<group>"; };
+		75EF9C50206CC41E00CC0EE0 /* DisplayLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayLink.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,19 +145,17 @@
 		752B1CC3201E4B4C00FBDA98 /* MetalImage */ = {
 			isa = PBXGroup;
 			children = (
-				7552F65B20211840008A0300 /* Static.swift */,
+				75EF9C4F206CC3EE00CC0EE0 /* Unused */,
+				75EF9C4E206CC3C900CC0EE0 /* Utilities */,
+				75EF9C4D206CC3C100CC0EE0 /* Filters */,
 				752B1CFA201E4CFA00FBDA98 /* Protocols.swift */,
 				752B1CFB201E4CFA00FBDA98 /* MetalContext.swift */,
-				752B1D18201E504B00FBDA98 /* AtomicQueue.swift */,
-				752B1CF7201E4CF900FBDA98 /* BasicFilter.swift */,
 				752B1D00201E4CFA00FBDA98 /* Camera.swift */,
 				752B1D01201E4CFA00FBDA98 /* Image.swift */,
-				752B1CF8201E4CF900FBDA98 /* MetalImageLog.swift */,
 				752B1CF9201E4CF900FBDA98 /* MovieInput.swift */,
 				752B1CFC201E4CFA00FBDA98 /* MovieOutput.swift */,
 				752B1CFD201E4CFA00FBDA98 /* RenderView.swift */,
 				752B1CFE201E4CFA00FBDA98 /* DisplayShaders.metal */,
-				752B1CFF201E4CFA00FBDA98 /* AudioPlayer.swift */,
 				752B1CC5201E4B4C00FBDA98 /* Info.plist */,
 			);
 			path = MetalImage;
@@ -167,6 +168,33 @@
 				752B1CD1201E4B4D00FBDA98 /* Info.plist */,
 			);
 			path = MetalImageTests;
+			sourceTree = "<group>";
+		};
+		75EF9C4D206CC3C100CC0EE0 /* Filters */ = {
+			isa = PBXGroup;
+			children = (
+				752B1CF7201E4CF900FBDA98 /* BaseFilter.swift */,
+			);
+			path = Filters;
+			sourceTree = "<group>";
+		};
+		75EF9C4E206CC3C900CC0EE0 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				752B1CF8201E4CF900FBDA98 /* Log.swift */,
+				7552F65B20211840008A0300 /* Static.swift */,
+				752B1D18201E504B00FBDA98 /* AtomicQueue.swift */,
+				75EF9C50206CC41E00CC0EE0 /* DisplayLink.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		75EF9C4F206CC3EE00CC0EE0 /* Unused */ = {
+			isa = PBXGroup;
+			children = (
+				752B1CFF201E4CFA00FBDA98 /* AudioPlayer.swift */,
+			);
+			path = Unused;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -319,7 +347,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				752B1D04201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */,
+				752B1D04201E4CFA00FBDA98 /* Log.swift in Sources */,
 				752B1D1C201E555900FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D06201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
 				7552F65C20211840008A0300 /* Static.swift in Sources */,
@@ -327,7 +355,8 @@
 				752B1D12201E4CFA00FBDA98 /* AudioPlayer.swift in Sources */,
 				752B1D0A201E4CFA00FBDA98 /* MetalContext.swift in Sources */,
 				752B1D0C201E4CFA00FBDA98 /* MovieOutput.swift in Sources */,
-				752B1D02201E4CFA00FBDA98 /* BasicFilter.swift in Sources */,
+				75EF9C51206CC41E00CC0EE0 /* DisplayLink.swift in Sources */,
+				752B1D02201E4CFA00FBDA98 /* BaseFilter.swift in Sources */,
 				752B1D14201E4CFA00FBDA98 /* Camera.swift in Sources */,
 				752B1D0E201E4CFA00FBDA98 /* RenderView.swift in Sources */,
 				752B1D16201E4CFA00FBDA98 /* Image.swift in Sources */,
@@ -347,7 +376,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				752B1D05201E4CFA00FBDA98 /* MetalImageLog.swift in Sources */,
+				752B1D05201E4CFA00FBDA98 /* Log.swift in Sources */,
 				752B1D1B201E555800FBDA98 /* DisplayShaders.metal in Sources */,
 				752B1D07201E4CFA00FBDA98 /* MovieInput.swift in Sources */,
 				7552F65D20211840008A0300 /* Static.swift in Sources */,
@@ -355,7 +384,8 @@
 				752B1D13201E4CFA00FBDA98 /* AudioPlayer.swift in Sources */,
 				752B1D0B201E4CFA00FBDA98 /* MetalContext.swift in Sources */,
 				752B1D0D201E4CFA00FBDA98 /* MovieOutput.swift in Sources */,
-				752B1D03201E4CFA00FBDA98 /* BasicFilter.swift in Sources */,
+				75EF9C52206CC41E00CC0EE0 /* DisplayLink.swift in Sources */,
+				752B1D03201E4CFA00FBDA98 /* BaseFilter.swift in Sources */,
 				752B1D15201E4CFA00FBDA98 /* Camera.swift in Sources */,
 				752B1D0F201E4CFA00FBDA98 /* RenderView.swift in Sources */,
 				752B1D17201E4CFA00FBDA98 /* Image.swift in Sources */,

@@ -36,7 +36,7 @@ public class BaseComputeFilter: ImageSource, ImageConsumer {
     }
 
     deinit {
-        Log("Deinit Base Compute Filter")
+        Log.debug("Deinit Base Compute Filter")
     }
 
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
@@ -88,7 +88,7 @@ public class BaseComputeFilter: ImageSource, ImageConsumer {
         do {
             computePipelineState = try context.createComputePipeline(computeFunctionName: pipelineState.computeShader)
         } catch {
-            Log("Could not create compute pipeline state.")
+            Log.error("Could not create compute pipeline state.")
         }
     }
 }
@@ -120,7 +120,7 @@ public class BaseRenderFilter: ImageSource, ImageConsumer {
     }
 
     deinit {
-        Log("Deinit Base Render Filter")
+        Log.debug("Deinit Base Render Filter")
     }
 
     public func newFrameReady(at time: CMTime, at index: Int, using buffer: MTLCommandBuffer) {
@@ -187,7 +187,7 @@ public class BaseRenderFilter: ImageSource, ImageConsumer {
         do {
             renderPipelineState = try context.createRenderPipeline(vertexFunctionName: pipelineState.vertexShader, fragmentFunctionName: pipelineState.fragmentShader)
         } catch {
-            Log("Could not create render pipeline state.")
+            Log.error("Could not create render pipeline state.")
         }
     }
 }

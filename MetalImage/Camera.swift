@@ -25,11 +25,9 @@ public class Camera: NSObject, ImageSource {
 
     fileprivate let metalTextureCache: CVMetalTextureCache
 
-    #if os(iOS)
-    private var displayLink: CADisplayLink?
-    #elseif os(OSX)
-    private var displayLink: CVDisplayLink?
-    #endif
+    private lazy var displayLink = DisplayLink { (displayLink, timestamp) in
+        self.render()
+    }
 
     public weak var audioEncodingTarget: AudioEncodingTarget? {
         didSet {
@@ -39,7 +37,7 @@ public class Camera: NSObject, ImageSource {
 
     public init?(preferredCaptureDevice: AVCaptureDevice.Position = .back, context: MetalContext) {
         guard let textureCache = context.textureCache() else {
-            Log("Could not create texture cache")
+            Log.error("Could not create texture cache")
             return nil
         }
 
@@ -78,7 +76,7 @@ public class Camera: NSObject, ImageSource {
         }
 
         guard let finalVideoDevice = videoDevice, let finalAudioDevice = audioDevice else {
-            Log("Failed to get video or audio device")
+            Log.error("Failed to get video or audio device")
             return
         }
 
@@ -101,7 +99,7 @@ public class Camera: NSObject, ImageSource {
         if captureSession.canAddOutput(videoOutput) {
             captureSession.addOutput(videoOutput)
         } else {
-            Log("Could not add video output to capture session.")
+            Log.error("Could not add video output to capture session.")
         }
 
         let audioOutput = AVCaptureAudioDataOutput()
@@ -115,7 +113,7 @@ public class Camera: NSObject, ImageSource {
         if captureSession.canAddOutput(audioOutput) {
             captureSession.addOutput(audioOutput)
         } else {
-            Log("Could not add audio output to capture session.")
+            Log.error("Could not add audio output to capture session.")
         }
 
         captureSession.commitConfiguration()
@@ -129,53 +127,27 @@ public class Camera: NSObject, ImageSource {
                 videoConnection.isVideoMirrored = true
             }
         }
-
-        #if os(iOS)
-            displayLink = CADisplayLink(target: self, selector: #selector(render))
-            displayLink?.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
-            displayLink?.isPaused = true
-        #elseif os(OSX)
-            CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
-            CVDisplayLinkSetOutputHandler(displayLink!) { [weak self] (displayLink, inNow, inOutputTime, flagsIn, flagsOut) -> CVReturn in
-                self?.render()
-                return kCVReturnSuccess
-            }
-        #endif
     }
 
     deinit {
+        displayLink.invalidate()
+
         for input in captureSession.inputs {
             captureSession.removeInput(input)
         }
 
-        Log("Deinit Camera")
+        Log.debug("Deinit Camera")
     }
 
     public func start() {
         captureSession.startRunning()
-        guard let displayLink = displayLink else {
-            Log("Could not start display link")
-            return
-        }
-        #if os(iOS)
-            displayLink.isPaused = false
-        #elseif os(OSX)
-            CVDisplayLinkStart(displayLink)
-        #endif
+        displayLink.start()
     }
 
     public func stop() {
         captureSession.stopRunning()
 
-        guard let displayLink = displayLink else {
-            Log("Could not stop display link")
-            return
-        }
-        #if os(iOS)
-            displayLink.isPaused = true
-        #elseif os(OSX)
-            CVDisplayLinkStop(displayLink)
-        #endif
+        displayLink.stop()
     }
 
     @objc func render() {
@@ -198,10 +170,10 @@ public class Camera: NSObject, ImageSource {
             if captureSession.canAddInput(input) {
                 captureSession.addInput(input)
             } else {
-                Log("Could not add input: \(input).")
+                Log.error("Could not add input: \(input).")
             }
         } catch {
-            Log("Failed to retrieve input for device: \(device)")
+            Log.error("Failed to retrieve input for device: \(device)")
         }
     }
 }
@@ -222,7 +194,7 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDa
                     let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
 
                     guard result == kCVReturnSuccess else {
-                        Log("Failed to get metal texture from pixel buffer")
+                        Log.error("Failed to get metal texture from pixel buffer")
                         return
                     }
                     

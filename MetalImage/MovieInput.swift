@@ -43,11 +43,9 @@ public class MovieInput: ImageSource {
 
     private let playbackOptions: PlaybackOptions
 
-    #if os(iOS)
-    private var displayLink: CADisplayLink?
-    #elseif os(OSX)
-    private var displayLink: CVDisplayLink?
-    #endif
+    private lazy var displayLink = DisplayLink { (displayLink, timestamp) in
+        self.render(displayLink: displayLink, timestamp: timestamp)
+    }
 
     private var completionCallback: (() -> Void)?
     private(set) var isRunning: Bool = false
@@ -60,7 +58,7 @@ public class MovieInput: ImageSource {
 
     public init?(url: URL, playbackOptions: PlaybackOptions = .none, context: MetalContext) {
         guard let textureCache = context.textureCache() else {
-            Log("Could not create texture cache")
+            Log.error("Could not create texture cache")
             return nil
         }
 
@@ -82,7 +80,7 @@ public class MovieInput: ImageSource {
             itemVideoOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: attributes)
 
             playerItem?.add(itemVideoOutput!)
-            configureRealtimePlaybackAudio(audioTracks: audioTracks, playerItem: playerItem!)
+            configureRealtimePlaybackAudio(audioTracks: audioTracks, playerItem: &playerItem!)
 
             NotificationCenter.default.addObserver(self, selector: #selector(finishedItemPlayback(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
             player?.replaceCurrentItem(with: playerItem)
@@ -95,35 +93,11 @@ public class MovieInput: ImageSource {
             } else {
                 player?.actionAtItemEnd = AVPlayerActionAtItemEnd.pause
             }
-
-            #if os(iOS)
-                displayLink = CADisplayLink(target: self, selector: #selector(render(displayLink:)))
-                displayLink?.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
-                displayLink?.isPaused = true
-            #elseif os(OSX)
-                CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
-                CVDisplayLinkSetOutputHandler(displayLink!) { [weak self] (displayLink, inNow, inOutputTime, flagsIn, flagsOut) -> CVReturn in
-                    guard let strongSelf = self, let videoOutput = strongSelf.itemVideoOutput else {
-                        return kCVReturnSuccess
-                    }
-
-                    var currentTime = kCMTimeInvalid
-                    let nextVSync = inNow.pointee
-                    currentTime = videoOutput.itemTime(for: nextVSync)
-                    strongSelf.frameTime = CMTimeAdd(currentTime, strongSelf.endRecordingTime)
-
-                    if videoOutput.hasNewPixelBuffer(forItemTime: currentTime), let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
-                        strongSelf.readNextImage(pixelBuffer: pixelBuffer, at: strongSelf.frameTime)
-                    }
-
-                    return kCVReturnSuccess
-                }
-            #endif
         } else {
             do {
                 try assetReader = AVAssetReader(asset: asset)
             } catch {
-                Log("Could not create asset reader for asset")
+                Log.error("Could not create asset reader for asset")
                 return nil
             }
 
@@ -135,12 +109,12 @@ public class MovieInput: ImageSource {
     deinit {
         completionCallback = nil
         NotificationCenter.default.removeObserver(self)
-        Log("Deinit Movie Input")
+        Log.debug("Deinit Movie Input")
     }
 
     public func start(completion: (() -> Void)?) {
         guard isRunning == false else {
-            Log("Movie reader is already running")
+            Log.warning("Movie reader is already running")
             return
         }
 
@@ -150,16 +124,7 @@ public class MovieInput: ImageSource {
             completionCallback = completion
             player?.play()
 
-            guard let displayLink = displayLink else {
-                Log("Could not stop display link")
-                return
-            }
-
-            #if os(iOS)
-                displayLink.isPaused = false
-            #elseif os(OSX)
-                CVDisplayLinkStart(displayLink)
-            #endif
+            displayLink.start()
         } else {
             asset.loadValuesAsynchronously(forKeys: ["duration", "tracks"]) { [weak self] in
                 guard let strongSelf = self, let assetReader = strongSelf.assetReader else {
@@ -182,12 +147,12 @@ public class MovieInput: ImageSource {
                 DispatchQueue.global(qos: .default).async {
                     var error: NSError?
                     guard strongSelf.asset.statusOfValue(forKey: "tracks", error: &error) == .loaded else {
-                        Log("Could not load tracks. Error = \(String(describing: error))")
+                        Log.error("Could not load tracks. Error = \(String(describing: error))")
                         return
                     }
 
                     guard assetReader.startReading() == true else {
-                        Log("Could not start asset reader")
+                        Log.error("Could not start asset reader")
                         return
                     }
 
@@ -221,7 +186,7 @@ public class MovieInput: ImageSource {
 
     public func stop() {
         guard isRunning == true else {
-            Log("Movie reader already stopped running")
+            Log.warning("Movie reader already stopped running")
             return
         }
 
@@ -231,16 +196,7 @@ public class MovieInput: ImageSource {
 
             player?.pause()
 
-            guard let displayLink = displayLink else {
-                Log("Could not stop display link")
-                return
-            }
-
-            #if os(iOS)
-                displayLink.isPaused = true
-            #elseif os(OSX)
-                CVDisplayLinkStop(displayLink)
-            #endif
+            displayLink.stop()
         } else {
             assetReader?.cancelReading()
         }
@@ -271,7 +227,7 @@ public class MovieInput: ImageSource {
         let storage = MTAudioProcessingTapGetStorage(tap)
 
         free(storage)
-        print("finalize \n")
+        Log.info("Audio tap finalized")
     }
 
     private let tapPrepare: MTAudioProcessingTapPrepareCallback = {
@@ -280,12 +236,12 @@ public class MovieInput: ImageSource {
         var structure: AudioStructure = MTAudioProcessingTapGetStorage(tap).bindMemory(to: AudioStructure.self, capacity: 1).pointee
         structure.audioFormat = streamDescription.pointee
 
-        print("prepare \n")
+        Log.info("Audio tap prepared")
     }
 
     private var tapUnprepare: MTAudioProcessingTapUnprepareCallback = {
         (tap) in
-        print("unprepare \n")
+        Log.info("Audio tap unprepared")
     }
 
     private var tapProcess: MTAudioProcessingTapProcessCallback = {
@@ -303,7 +259,7 @@ public class MovieInput: ImageSource {
         }
     }
 
-    private func configureRealtimePlaybackAudio(audioTracks: [AVAssetTrack], playerItem: AVPlayerItem) {
+    private func configureRealtimePlaybackAudio(audioTracks: [AVAssetTrack], playerItem: inout AVPlayerItem) {
         let rawPointerSelf = Unmanaged.passUnretained(self).toOpaque()
 
         var callbacks = MTAudioProcessingTapCallbacks(
@@ -356,16 +312,7 @@ public class MovieInput: ImageSource {
 
         endRecordingTime = frameTime
         if playbackOptions != .playAtactualSpeedAndLoopIndefinetely {
-            guard let displayLink = displayLink else {
-                Log("Could not stop display link")
-                return
-            }
-
-            #if os(iOS)
-                displayLink.isPaused = true
-            #elseif os(OSX)
-                CVDisplayLinkStop(displayLink)
-            #endif
+            displayLink.stop()
 
             player.advanceToNextItem()
             isRunning = false
@@ -373,19 +320,22 @@ public class MovieInput: ImageSource {
         }
     }
 
-    #if os(iOS)
-    @objc private func render(displayLink: CADisplayLink) {
+
+    private func render(displayLink: MIDisplayLink, timestamp: CFTimeInterval) {
         guard let videoOutput = itemVideoOutput else {
             return
         }
-        let nextVsync: CFTimeInterval = displayLink.timestamp + displayLink.duration
+        #if os(iOS)
+            let nextVsync: CFTimeInterval = timestamp + displayLink.duration
+        #elseif os(OSX)
+            let nextVsync: CFTimeInterval = timestamp
+        #endif
         let currentTime = videoOutput.itemTime(forHostTime: nextVsync)
 
         if videoOutput.hasNewPixelBuffer(forItemTime: currentTime), let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
             readNextImage(pixelBuffer: pixelBuffer, at: currentTime)
         }
     }
-    #endif
 
     private func readNextImage(pixelBuffer: CVImageBuffer, at frameTime: CMTime) {
         let width = CVPixelBufferGetWidth(pixelBuffer)
@@ -395,7 +345,7 @@ public class MovieInput: ImageSource {
         let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
 
         guard result == kCVReturnSuccess else {
-            Log("Failed to get metal texture from pixel buffer")
+            Log.error("Failed to get Metal texture from pixel buffer")
             return
         }
 
@@ -420,7 +370,7 @@ public class MovieInput: ImageSource {
             }
 
             guard let pixelBuffer: CVImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-                Log("Could not get pixel buffer.")
+                Log.error("Could not get pixel buffer.")
                 return
             }
 
@@ -443,7 +393,7 @@ public class MovieInput: ImageSource {
 
         status = CMAudioFormatDescriptionCreate(kCFAllocatorDefault, audioFormat, 0, nil, 0, nil, nil, &format)
         if status != noErr {
-            print("Error CMAudioFormatDescriptionCreater :\(String(describing: status))")
+            Log.error("Error CMAudioFormatDescriptionCreater :\(String(describing: status))")
             return
         }
 
@@ -452,13 +402,13 @@ public class MovieInput: ImageSource {
         status = CMSampleBufferCreate(kCFAllocatorDefault, nil, false, nil, nil, format, framesNumber, 1, &timing, 0, nil, &sampleBuffer)
 
         if status != noErr {
-            print("Error CMSampleBufferCreate :\(String(describing: status))")
+            Log.error("Error CMSampleBufferCreate :\(String(describing: status))")
             return
         }
 
         status = CMSampleBufferSetDataBufferFromAudioBufferList(sampleBuffer!, kCFAllocatorDefault , kCFAllocatorDefault, 0, audioData)
         if status != noErr {
-            print("Error CMSampleBufferSetDataBufferFromAudioBufferList :\(String(describing: status))")
+            Log.error("Error CMSampleBufferSetDataBufferFromAudioBufferList :\(String(describing: status))")
             return
         }
 
@@ -467,7 +417,7 @@ public class MovieInput: ImageSource {
 
     private func setupAudio(audioTracks: [AVAssetTrack], for reader: AVAssetReader) {
         guard audioTracks.count > 0 else {
-            Log("The asset does not have any audio tracks")
+            Log.info("The asset does not have any audio tracks")
             return
         }
 
@@ -480,13 +430,13 @@ public class MovieInput: ImageSource {
         if reader.canAdd(audioTrackOutput) {
             reader.add(audioTrackOutput)
         } else {
-            Log("Could not add audio output to reader")
+            Log.error("Could not add audio output to reader")
         }
     }
 
     private func setupVideo(videoTracks: [AVAssetTrack], for reader: AVAssetReader) {
         guard let videoTrack = videoTracks.first else {
-            Log("The asset does not have any video tracks")
+            Log.info("The asset does not have any video tracks")
             return
         }
         
@@ -499,7 +449,7 @@ public class MovieInput: ImageSource {
         if reader.canAdd(videoTrackOutput) {
             reader.add(videoTrackOutput)
         } else {
-            Log("Could not add video output to reader")
+            Log.error("Could not add video output to reader")
         }
     }
 }
