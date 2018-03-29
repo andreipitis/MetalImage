@@ -11,18 +11,20 @@ import CoreVideo
 
 #if os(iOS)
     typealias MIDisplayLink = CADisplayLink
+    typealias MITimestamp = CFTimeInterval
 #elseif os(OSX)
     typealias MIDisplayLink = CVDisplayLink
+    typealias MITimestamp = CVTimeStamp
 #endif
 
 class DisplayLink {
     private var displayLink: MIDisplayLink?
 
-    private var timestamp: CFTimeInterval = 0
+    private var timestamp: MITimestamp!
 
-    private var callback: ((MIDisplayLink, Double) -> Void)
+    private var callback: ((MIDisplayLink, MITimestamp) -> Void)
 
-    init(callback: @escaping (MIDisplayLink, Double) -> Void) {
+    init(callback: @escaping (MIDisplayLink, MITimestamp) -> Void) {
         self.callback = callback
 
         #if os(iOS)
@@ -32,7 +34,7 @@ class DisplayLink {
         #elseif os(OSX)
             CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
             CVDisplayLinkSetOutputHandler(displayLink!) { [weak self] (displayLink, inNow, inOutputTime, flagsIn, flagsOut) -> CVReturn in
-                self?.timestamp = CFTimeInterval(inNow.pointee.smpteTime.seconds)
+                self?.timestamp = inNow.pointee
                 self?.run(displayLink: displayLink)
                 return kCVReturnSuccess
             }
@@ -78,7 +80,7 @@ class DisplayLink {
         #if os(iOS)
             let timestamp = displayLink.timestamp
         #elseif os(OSX)
-            let timestamp = self.timestamp
+            let timestamp = self.timestamp!
         #endif
 
         callback(displayLink, timestamp)

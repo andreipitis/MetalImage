@@ -49,6 +49,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
     private let vertexBuffer: MTLBuffer
     private let textureBuffer: MTLBuffer
 
+    //Make sure liveVideo is set correctly. On OSX not setting it correctly may lead to a crash or corrupt recording.
     public init?(url: URL, size: CGSize, fileType: AVFileType = AVFileType.mov, liveVideo: Bool = false, optimizeForNetworkUse: Bool = true, context: MetalContext) {
         self.liveVideo = liveVideo
 
@@ -67,19 +68,24 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriterVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoOutputSettings)
         assetWriterVideoInput.expectsMediaDataInRealTime = liveVideo
 
-        #if os(iOS)
-            let audioOutputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM,
+        
+        let audioOutputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM,
                                                   AVNumberOfChannelsKey: 1,
                                                   AVSampleRateKey: 44100.0,
                                                   AVLinearPCMIsBigEndianKey: true,
                                                   AVLinearPCMIsFloatKey: false,
                                                   AVLinearPCMIsNonInterleaved: false,
                                                   AVLinearPCMBitDepthKey: 32]
-
+        #if os(iOS)
             assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
         #elseif os(OSX)
-            assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
+            if liveVideo == true {
+                assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
+            } else {
+                assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+            }
         #endif
+        
         assetWriterAudioInput.expectsMediaDataInRealTime = liveVideo
 
         let sourcePixelBufferAttributes: [String: Any] = [
@@ -271,7 +277,6 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             //Pixel buffer pool becomes nil if we submit video frames with the same timestamp
             if previousTime >= time {
                 previousTime = time
-//                Log("Dropped a video frame")
                 return
             }
 

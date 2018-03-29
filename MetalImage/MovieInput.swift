@@ -321,20 +321,28 @@ public class MovieInput: ImageSource {
     }
 
 
-    private func render(displayLink: MIDisplayLink, timestamp: CFTimeInterval) {
+    private func render(displayLink: MIDisplayLink, timestamp: MITimestamp) {
         guard let videoOutput = itemVideoOutput else {
             return
         }
+        //TODO: Compare timestamps for iOS and OSX and figure out how to remove the OS checks
         #if os(iOS)
             let nextVsync: CFTimeInterval = timestamp + displayLink.duration
-        #elseif os(OSX)
-            let nextVsync: CFTimeInterval = timestamp
-        #endif
-        let currentTime = videoOutput.itemTime(forHostTime: nextVsync)
+            let currentTime = videoOutput.itemTime(forHostTime: nextVsync)
 
-        if videoOutput.hasNewPixelBuffer(forItemTime: currentTime), let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
-            readNextImage(pixelBuffer: pixelBuffer, at: currentTime)
-        }
+            if videoOutput.hasNewPixelBuffer(forItemTime: currentTime), let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
+                readNextImage(pixelBuffer: pixelBuffer, at: currentTime)
+            }
+        #elseif os(OSX)
+            var currentTime = kCMTimeInvalid
+            let nextVSync = timestamp
+            currentTime = videoOutput.itemTime(for: nextVSync)
+            frameTime = CMTimeAdd(currentTime, endRecordingTime)
+
+            if videoOutput.hasNewPixelBuffer(forItemTime: currentTime), let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
+                readNextImage(pixelBuffer: pixelBuffer, at: frameTime)
+            }
+        #endif
     }
 
     private func readNextImage(pixelBuffer: CVImageBuffer, at frameTime: CMTime) {
