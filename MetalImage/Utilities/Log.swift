@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Log {
+class Logger {
     enum LogLevel: Int {
         case debug = 0
         case info = 1

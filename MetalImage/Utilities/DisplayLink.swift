@@ -42,12 +42,12 @@ class DisplayLink {
     }
 
     deinit {
-        Log.debug("Deinit Display Link")
+        Logger.debug("Deinit Display Link")
     }
 
     func start() {
         guard let displayLink = displayLink else {
-            Log.debug("Display Link in nil.")
+            Logger.debug("Display Link in nil.")
             return
         }
         #if os(iOS)
@@ -59,7 +59,7 @@ class DisplayLink {
 
     func stop() {
         guard let displayLink = displayLink else {
-            Log.debug("Display Link in nil.")
+            Logger.debug("Display Link in nil.")
             return
         }
 

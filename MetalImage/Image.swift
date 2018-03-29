@@ -51,7 +51,7 @@ public class Image: ImageSource {
         do {
             outputTexture = try textureLoader.newTexture(cgImage: cgImage, options: options)
         } catch {
-            Log.error(error)
+            Logger.error(error)
             return nil
         }
     }

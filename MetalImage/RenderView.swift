@@ -97,7 +97,7 @@ public class RenderView: View, ImageConsumer {
             do {
                 renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
             } catch {
-                Log.error("Could not create render pipeline state.")
+                Logger.error("Could not create render pipeline state.")
             }
 
             indexBuffer = context.buffer(array: Static.indexData)

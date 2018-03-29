@@ -61,7 +61,7 @@ class AudioPlayer: AURenderCallbackDelegate {
 
     func start() -> Bool {
         guard let audioGraph = audioGraph else {
-            Log.error("Could not start audio graph")
+            Logger.error("Could not start audio graph")
             return false
         }
 
@@ -70,7 +70,7 @@ class AudioPlayer: AURenderCallbackDelegate {
 
     func stop() -> Bool {
         guard let audioGraph = audioGraph else {
-            Log.error("Could not stop audio graph")
+            Logger.error("Could not stop audio graph")
             return false
         }
 
@@ -84,7 +84,7 @@ class AudioPlayer: AURenderCallbackDelegate {
         NewAUGraph(&audioGraph)
 
         guard let audioGraph = audioGraph else {
-            Log.error("Could not create audio graph")
+            Logger.error("Could not create audio graph")
             return
         }
 
@@ -106,7 +106,7 @@ class AudioPlayer: AURenderCallbackDelegate {
         AUGraphNodeInfo(audioGraph, mixerNode, nil, &audioUnit)
 
         guard let audioUnit = audioUnit else {
-            Log.error("Could not create audio unit")
+            Logger.error("Could not create audio unit")
             return
         }
 

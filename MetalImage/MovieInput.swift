@@ -58,7 +58,7 @@ public class MovieInput: ImageSource {
 
     public init?(url: URL, playbackOptions: PlaybackOptions = .none, context: MetalContext) {
         guard let textureCache = context.textureCache() else {
-            Log.error("Could not create texture cache")
+            Logger.error("Could not create texture cache")
             return nil
         }
 
@@ -97,7 +97,7 @@ public class MovieInput: ImageSource {
             do {
                 try assetReader = AVAssetReader(asset: asset)
             } catch {
-                Log.error("Could not create asset reader for asset")
+                Logger.error("Could not create asset reader for asset")
                 return nil
             }
 
@@ -109,12 +109,12 @@ public class MovieInput: ImageSource {
     deinit {
         completionCallback = nil
         NotificationCenter.default.removeObserver(self)
-        Log.debug("Deinit Movie Input")
+        Logger.debug("Deinit Movie Input")
     }
 
     public func start(completion: (() -> Void)?) {
         guard isRunning == false else {
-            Log.warning("Movie reader is already running")
+            Logger.warning("Movie reader is already running")
             return
         }
 
@@ -147,12 +147,12 @@ public class MovieInput: ImageSource {
                 DispatchQueue.global(qos: .default).async {
                     var error: NSError?
                     guard strongSelf.asset.statusOfValue(forKey: "tracks", error: &error) == .loaded else {
-                        Log.error("Could not load tracks. Error = \(String(describing: error))")
+                        Logger.error("Could not load tracks. Error = \(String(describing: error))")
                         return
                     }
 
                     guard assetReader.startReading() == true else {
-                        Log.error("Could not start asset reader")
+                        Logger.error("Could not start asset reader")
                         return
                     }
 
@@ -186,7 +186,7 @@ public class MovieInput: ImageSource {
 
     public func stop() {
         guard isRunning == true else {
-            Log.warning("Movie reader already stopped running")
+            Logger.warning("Movie reader already stopped running")
             return
         }
 
@@ -227,7 +227,7 @@ public class MovieInput: ImageSource {
         let storage = MTAudioProcessingTapGetStorage(tap)
 
         free(storage)
-        Log.info("Audio tap finalized")
+        Logger.info("Audio tap finalized")
     }
 
     private let tapPrepare: MTAudioProcessingTapPrepareCallback = {
@@ -236,12 +236,12 @@ public class MovieInput: ImageSource {
         var structure: AudioStructure = MTAudioProcessingTapGetStorage(tap).bindMemory(to: AudioStructure.self, capacity: 1).pointee
         structure.audioFormat = streamDescription.pointee
 
-        Log.info("Audio tap prepared")
+        Logger.info("Audio tap prepared")
     }
 
     private var tapUnprepare: MTAudioProcessingTapUnprepareCallback = {
         (tap) in
-        Log.info("Audio tap unprepared")
+        Logger.info("Audio tap unprepared")
     }
 
     private var tapProcess: MTAudioProcessingTapProcessCallback = {
@@ -353,7 +353,7 @@ public class MovieInput: ImageSource {
         let result = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, metalTextureCache, pixelBuffer, nil, .bgra8Unorm, width, height, 0, &cvMetalTexture)
 
         guard result == kCVReturnSuccess else {
-            Log.error("Failed to get Metal texture from pixel buffer")
+            Logger.error("Failed to get Metal texture from pixel buffer")
             return
         }
 
@@ -378,7 +378,7 @@ public class MovieInput: ImageSource {
             }
 
             guard let pixelBuffer: CVImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-                Log.error("Could not get pixel buffer.")
+                Logger.error("Could not get pixel buffer.")
                 return
             }
 
@@ -401,7 +401,7 @@ public class MovieInput: ImageSource {
 
         status = CMAudioFormatDescriptionCreate(kCFAllocatorDefault, audioFormat, 0, nil, 0, nil, nil, &format)
         if status != noErr {
-            Log.error("Error CMAudioFormatDescriptionCreater :\(String(describing: status))")
+            Logger.error("Error CMAudioFormatDescriptionCreater :\(String(describing: status))")
             return
         }
 
@@ -410,13 +410,13 @@ public class MovieInput: ImageSource {
         status = CMSampleBufferCreate(kCFAllocatorDefault, nil, false, nil, nil, format, framesNumber, 1, &timing, 0, nil, &sampleBuffer)
 
         if status != noErr {
-            Log.error("Error CMSampleBufferCreate :\(String(describing: status))")
+            Logger.error("Error CMSampleBufferCreate :\(String(describing: status))")
             return
         }
 
         status = CMSampleBufferSetDataBufferFromAudioBufferList(sampleBuffer!, kCFAllocatorDefault , kCFAllocatorDefault, 0, audioData)
         if status != noErr {
-            Log.error("Error CMSampleBufferSetDataBufferFromAudioBufferList :\(String(describing: status))")
+            Logger.error("Error CMSampleBufferSetDataBufferFromAudioBufferList :\(String(describing: status))")
             return
         }
 
@@ -425,7 +425,7 @@ public class MovieInput: ImageSource {
 
     private func setupAudio(audioTracks: [AVAssetTrack], for reader: AVAssetReader) {
         guard audioTracks.count > 0 else {
-            Log.info("The asset does not have any audio tracks")
+            Logger.info("The asset does not have any audio tracks")
             return
         }
 
@@ -438,13 +438,13 @@ public class MovieInput: ImageSource {
         if reader.canAdd(audioTrackOutput) {
             reader.add(audioTrackOutput)
         } else {
-            Log.error("Could not add audio output to reader")
+            Logger.error("Could not add audio output to reader")
         }
     }
 
     private func setupVideo(videoTracks: [AVAssetTrack], for reader: AVAssetReader) {
         guard let videoTrack = videoTracks.first else {
-            Log.info("The asset does not have any video tracks")
+            Logger.info("The asset does not have any video tracks")
             return
         }
         
@@ -457,7 +457,7 @@ public class MovieInput: ImageSource {
         if reader.canAdd(videoTrackOutput) {
             reader.add(videoTrackOutput)
         } else {
-            Log.error("Could not add video output to reader")
+            Logger.error("Could not add video output to reader")
         }
     }
 }

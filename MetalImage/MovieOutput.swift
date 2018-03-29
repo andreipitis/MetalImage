@@ -100,7 +100,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         do {
             renderPipelineState = try context.createRenderPipeline(vertexFunctionName: "basic_vertex", fragmentFunctionName: "basic_fragment")
         } catch {
-            Log.error("Could not create render pipeline state.")
+            Logger.error("Could not create render pipeline state.")
         }
 
         indexBuffer = context.buffer(array: Static.indexData)
@@ -117,12 +117,12 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
     }
 
     deinit {
-        Log.debug("Deinit Movie Output")
+        Logger.debug("Deinit Movie Output")
     }
 
     public func startRecording() {
         guard isRecording == false else {
-            Log.warning("Tried to start an already running recording.")
+            Logger.warning("Tried to start an already running recording.")
             return
         }
         assetWriter.startWriting()
@@ -132,7 +132,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
 
     public func endRecording(_ completionHandler: @escaping () -> ()) {
         guard isRecording == true else {
-            Log.warning("Tried to stop an already stopped recording.")
+            Logger.warning("Tried to stop an already stopped recording.")
             return
         }
 
@@ -168,7 +168,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
                 if strongSelf.assetWriterAudioInput.isReadyForMoreMediaData == false {
                     strongSelf.assetWriterAudioInput.markAsFinished()
 
-                    Log.debug("Audio writer can not take any more data.")
+                    Logger.debug("Audio writer can not take any more data.")
                     return
                 }
 
@@ -189,13 +189,13 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             if strongSelf.assetWriterVideoInput.isReadyForMoreMediaData == false {
                 strongSelf.assetWriterVideoInput.markAsFinished()
 
-                Log.debug("Video writer can not take any more data.")
+                Logger.debug("Video writer can not take any more data.")
                 return
             }
 
             if let item = strongSelf.videoQueue.dequeue() {
                 if strongSelf.assetWriterPixelBufferInput.append(item.sampleBuffer, withPresentationTime: item.presentationTime) == false {
-                    Log.error("Error appending pixel buffer")
+                    Logger.error("Error appending pixel buffer")
                 }
             }
         }
@@ -207,7 +207,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         }
 
         guard assetWriter.status != .failed else {
-            Log.error("Error, AVWriter failed: \(String(describing: assetWriter.error))")
+            Logger.error("Error, AVWriter failed: \(String(describing: assetWriter.error))")
             return
         }
 
@@ -283,7 +283,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             previousTime = time
 
             guard let pixelBufferPool = assetWriterPixelBufferInput.pixelBufferPool else {
-                Log.error("Could not retrieve pixel buffer pool")
+                Logger.error("Could not retrieve pixel buffer pool")
                 return
             }
 
@@ -291,13 +291,13 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             let result = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
 
             guard result == kCVReturnSuccess, let finalPixelBuffer = pixelBuffer, let texture = outputTexture else {
-                Log.error("Could not get a pixel buffer from the pool")
+                Logger.error("Could not get a pixel buffer from the pool")
                 return
             }
 
             CVPixelBufferLockBaseAddress(finalPixelBuffer, [])
             guard let pixelBufferBytes = CVPixelBufferGetBaseAddress(finalPixelBuffer) else {
-                Log.error("Could not get pixel buffer bytes.")
+                Logger.error("Could not get pixel buffer bytes.")
                 CVPixelBufferUnlockBaseAddress(finalPixelBuffer, [])
 
                 return
