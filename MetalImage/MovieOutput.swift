@@ -67,7 +67,8 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriterVideoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoOutputSettings)
         assetWriterVideoInput.expectsMediaDataInRealTime = liveVideo
 
-        let audioOutputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM,
+        #if os(iOS)
+            let audioOutputSettings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM,
                                                   AVNumberOfChannelsKey: 1,
                                                   AVSampleRateKey: 44100.0,
                                                   AVLinearPCMIsBigEndianKey: true,
@@ -75,7 +76,10 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
                                                   AVLinearPCMIsNonInterleaved: false,
                                                   AVLinearPCMBitDepthKey: 32]
 
-        assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+            assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioOutputSettings)
+        #elseif os(OSX)
+            assetWriterAudioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
+        #endif
         assetWriterAudioInput.expectsMediaDataInRealTime = liveVideo
 
         let sourcePixelBufferAttributes: [String: Any] = [
@@ -118,7 +122,6 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         assetWriter.startWriting()
 
         isRecording = true
-
     }
 
     public func endRecording(_ completionHandler: @escaping () -> ()) {
@@ -210,6 +213,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         synchronousQueue.sync {
             let currentSampleTime = CMSampleBufferGetPresentationTimeStamp(audioSampleBuffer)
 
+            //TODO: The samples do not seem to be trimmed correctly need to investigate further.
             #if os(OSX)
                 if liveVideo == true && firstAudioSample == true {
                     firstAudioSample = false
@@ -231,7 +235,6 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
             }
 
             audioQueue.enqueue(item: audioSampleBuffer)
-
         }
     }
 
@@ -315,7 +318,7 @@ public class MovieOutput: ImageConsumer, AudioEncodingTarget {
         let content: [Float] = Static.vertexData
 
         let inputSize = CGSize(width: width, height: height)
-        let outputSize = CGSize(width: outputTexture!.width, height: outputTexture!.width)
+        let outputSize = CGSize(width: outputTexture!.width, height: outputTexture!.height)
         let alteredVertexCoordinates = FillMode.aspectFit.convert(vertices: content, fromSize: inputSize, toSize: outputSize)
         vertexBuffer.contents().copyBytes(from: alteredVertexCoordinates, count: content.count * MemoryLayout<Float>.stride)
     }
