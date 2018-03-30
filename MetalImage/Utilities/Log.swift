@@ -26,7 +26,7 @@ class Logger {
                 return
             }
 
-            print("◽️\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("◽️ Debug: {\n\t\(Date())\n\t\(file):\n\t\(function)() Line \(line)\n\t\(input)\n}\n")
         #endif
     }
 
@@ -36,7 +36,7 @@ class Logger {
                 return
             }
 
-            print("\n🔷\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🔷 Info: {\n\t\(Date())\n\t\(file):\n\t\(function)() Line \(line)\n\t\(input)\n}\n")
         #endif
     }
 
@@ -46,7 +46,7 @@ class Logger {
                 return
             }
 
-            print("\n🔶\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🔶 Warning: {\n\t\(Date())\n\t\(file):\n\t\(function)() Line \(line)\n\t\(input)\n}\n")
         #endif
     }
 
@@ -56,7 +56,7 @@ class Logger {
                 return
             }
 
-            print("\n🛑\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
+            print("\n🛑 Error: {\n\t\(Date())\n\t\(file):\n\t\(function)() Line \(line)\n\t\(input)\n}\n")
         #endif
     }
 }

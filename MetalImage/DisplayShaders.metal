@@ -43,13 +43,24 @@ kernel void grayscaleCompute(texture2d<half, access::read>  inTexture   [[ textu
                           uint2                          gid         [[ thread_position_in_grid ]])
 {
     half3 kRec709Luma = half3(0.2126, 0.7152, 0.0722);
+    half4 inColor  = inTexture.read(gid);
+    half  gray     = dot(inColor.rgb, kRec709Luma);
+    half4 outColor = half4(gray, gray, gray, 1.0);
 
-    if((gid.x < outTexture.get_width()) && (gid.y < outTexture.get_height()))
-    {
-        half4 inColor  = inTexture.read(gid);
-        half  gray     = dot(inColor.rgb, kRec709Luma);
-        half4 outColor = half4(gray, gray, gray, 1.0);
-        
-        outTexture.write(outColor, gid);
-    }
+    outTexture.write(outColor, gid);
+}
+
+// Sepia compute shader
+kernel void sepiaCompute(texture2d<half, access::read>  inTexture   [[ texture(0) ]],
+                         texture2d<half, access::write> outTexture  [[ texture(1) ]],
+                         uint2                          gid         [[ thread_position_in_grid ]])
+{
+    half4 color = inTexture.read(gid);
+
+    half4 outColor = half4(clamp(color.r * 0.393 + color.g * 0.769 + color.b * 0.189, 0.0, 1.0),
+                           clamp(color.r * 0.349 + color.g * 0.686 + color.b * 0.168, 0.0, 1.0),
+                           clamp(color.r * 0.272 + color.g * 0.534 + color.b * 0.131, 0.0, 1.0),
+                           color.a);
+
+    outTexture.write(outColor, gid);
 }
